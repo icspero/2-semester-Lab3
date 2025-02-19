@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <algorithm>
+#include <string>
 #include <set>
 #include <cmath>
 #include <map>
@@ -73,7 +74,7 @@ int canon(int n, vector<int> A){
     return 0;
 }
 
-int test(int n, int t){
+int test_Miller(int n, int t){
 
     vector<int> A;
 
@@ -88,85 +89,62 @@ int test(int n, int t){
     }
 
     if (A.size() != k){
-        cout << "n - составное!" << endl;
+        //cout << "n - составное!" << endl;
         return 0;
     }
 
     int res = canon(n, A);
 
     if (res == 1) {
-        cout << "n - простое!" << endl;
+        //cout << "n - простое!" << endl;
+        return 1;
     }
     else {
-        cout << "n - составное!" << endl;
+        //cout << "n - составное!" << endl;
+        return 0;
     }
-
-    return 0;
 }
 
-int generate_m(const vector<int>& prime, int bit) {
+int generate_m(int bit) {
+
     srand(time(0));
-
-    int max = pow(2, bit) - 1; // максимальное значение для n
-    int min = pow(2, bit - 1); // минимальное значение для n
-    int m_max = (min - 1) / 2; // максимальное значение для m, учитывая n = 2m + 1
-
-    bool flag = false;
-    int m;
-
-    while (!flag) {
-        int temp = 1;
-        
-        // Генерация числа m
-        for (int i = 0; i < bit / 2; i++) {
-            int alpha = rand() % (bit / 2) + 1;  // случайная степень
-            for (int j = 0; j < alpha; j++) {
-                temp *= prime[i];  // возведение простого числа в степень alpha
-                if (temp > m_max) { // Если m выходит за пределы, прерываем цикл
-                    break;
-                }
-            }
-            if (temp > m_max) {
-                break;
-            }
+    vector<int> M;
+    
+    for (int i = pow(2, bit - 2); i < pow(2, bit - 1); i++) {
+        int res = test_Miller(i, 1);
+        if (res == 0) {
+            M.push_back(i);
         }
-
-        // Проверка, что m попадает в нужный диапазон
-        if (temp >= min / 2 && temp <= m_max) {
-            m = temp;
-            flag = true;
+        else {
+            continue;
         }
+    
     }
+
+    int temp = rand() % M.size();
+
+    int m = M[temp];
 
     return m;
 }
 
 int main() {
-    // Решето Эратосфена
-    vector<int> div{2, 3, 5, 7, 11, 13, 17, 19};
-    vector<int> prime;
-    
-    int X = 500;
-
-    for (int i = 2; i <= X; i++){
-        prime.push_back(i);
-    }
-
-    for (int i = 0; i < div.size(); i++) {
-        for (int j = 2; j < prime.size(); j++){
-            prime.erase(remove_if(prime.begin(), prime.end(), [&div, &i](int j) { return j % div[i] == 0 && j != div[i]; }), prime.end());
-        }
-    }
-
     int bit;
-    map<int, int> res;
-    
-    cout << "Размер в битах: "; 
+    cout << "Bit: ";
     cin >> bit;
-
-    int m = generate_m(prime, bit);
-
+    int m = generate_m(bit);
     int n = 2 * m + 1;
 
-    cout << "Полученное n: " << n << endl;
+    int res = test_Miller(n, 5);
+
+    string str;
+    if (res == 1) {
+        str = " - простое!";
+    }
+    else {
+        str = " - составное!";
+    }
+
+
+    cout << "n = " << n << str << endl;
 }
