@@ -74,10 +74,18 @@ bool probability_Test(int num, int k){ // Миллер-Рабин
     return true;
 }
 
-int canon(int n, vector<int> A){
-    vector<int> prime = sieveEratosthenes(500);
-    vector<int> check;
-    map<int, int> q;
+int NOD(int a, int p) { // проверка на взаимно простые числа
+    while (p != 0) { // поиск НОД (обобщенный алгоритм Евклида)
+        int r = p; // a и r переносят числа
+        p = a % p; // каждую итерацию  после первой берем остаток от пред. делителя и остатка
+        a = r;     // a%b = c >> b%c = g >> c%g = d
+    }
+    return a;
+}
+
+vector<int> canon(int n) {
+    vector<int> prime = sieveEratosthenes(2000);
+    vector<int> q;
     int N = n - 1;
 
     for (int i = 0; i < prime.size(); i++){
@@ -88,56 +96,111 @@ int canon(int n, vector<int> A){
                 R /= prime[i];
                 k += 1;
             }
-            q.insert({prime[i], k});
+            for (int j = 0; j < k; j++) {
+                q.push_back(prime[i]);
+            }
         }
         else {
             continue;
         }
     }
 
-    for (auto i : q) {
-        for (int j = 0; j < A.size(); j++){
-            int res = (powmod(j, ((n - 1)/i.first), n));
-            check.push_back(res);
-            if (res != 1){
+    int r, f;
+    vector<int> F;
+
+    while (true) {
+        int r = 1;
+        int f = 1;
+        
+        F.push_back(q[q.size()-1]);
+        q.pop_back();
+
+        for(int i = 0; i < F.size(); i++) {
+            f = f * F[i];
+        }
+
+        for (int i = 0; i < q.size(); i++){
+            r = r * q[i];
+        }
+
+        if (f > r && r % 2 == 0) {
+            return F;
+        }
+        else {
+            continue;
+        }
+    }
+}
+
+int test_Poclington(int n, int t) {
+    vector<int> A;
+    vector<int> check;
+
+    if (n == 1 || n == 0) {
+        return false;
+    }
+
+    vector<int> prime = sieveEratosthenes(8);
+    for (int i = 0; i < prime.size(); i++) {
+        if (n == prime[i]) {
+            return true;
+        }
+    }
+
+    for (int i = 0; i < t; i++){
+        A.push_back(rand() % (n - 2) + 2);
+    }
+
+    for (int i = 0; i < A.size(); i++) {
+        int res = powmod(A[i], n - 1, n);
+        if (res != 1) {
+            return false;
+        }
+    }
+
+    vector<int> F = canon(n);
+
+    for (int i = 0; i < A.size(); i++) {
+        int temp_a = A[i]; 
+        for (int i = 0; i < F.size(); i++) {
+            int res = powmod(temp_a, (n - 1)/F[i], n);
+            if (res == 1) {
                 break;
+            }
+            else {
+                check.push_back(res);
             }
         }
     }
 
-    for (int i = 0; i < check.size(); i++){
-        if (check[i] != 1){
-            return 1;
+    for (int i = 0; i < check.size(); i++) {
+        if (check[i] == 1) {
+            return false;
+        }
+        else {
+            return true;
         }
     }
 
     return 0;
 }
 
-int test_Miller(int n, int t){
-
-    vector<int> A;
-
-    for (int i = 0; i < t; i++){
-        A.push_back(rand() % (n - 2) + 2);
+int bitLen(int number){
+    int bitCount = 0;
+    while (number != 0){
+        bitCount++;
+        number /= 2;
     }
+    return bitCount;
+}
 
-    int k = 0;
-    for (int i = 0; i < A.size(); i++){
-        int res = powmod(A[i], n - 1, n);
-        k += res;
-    }
 
-    if (A.size() != k){
-        return false;
-    }
-
-    int res = canon(n, A);
-
-    if (res == 1) {
+bool oneBit(int m, int r){
+    int mBCoubt = bitLen(m), rBCount = bitLen(r);
+    if (mBCoubt - rBCount == 1){
         return true;
     }
-    else {
+    else{
         return false;
     }
 }
@@ -193,43 +256,53 @@ void printTable(const vector<int>& primeNums, const vector<bool>& primeTestAgree
 
 int main() {
     srand(time(0));
-    vector<int> sieve = sieveEratosthenes(500); //решето простых
+    vector<int> primes = sieveEratosthenes(500); // решето простых
     int t = 5;
     int test_k = 3;
-    int k;
     int m;
-    int n;
+    int r;
     bool isPrime;
+    int k;
     vector<int> primeNums; //вектор простых
-    vector<int> primeLostCount; //отвергнутые тестом миллера, но прошедшие вероятностный тест
-    vector<bool> primeTestAgree; //проходят ли вероятностный тест простые?
-    for (int l = 0; l < 10; l++){
-        isPrime = false; //"зануляем" после получения и записи простого числа
+    vector<int> primeLostCount; //отвергнутые тестом миллера, но прошедшие веро¤тностный тест
+    vector<bool> primeTestAgree; //проход¤т ли веро¤тностный тест простые?
+    for (int g = 0; g < 10; g++){
+        isPrime = false;
         k = 0;
-        while (!isPrime){ //пока не получим простое
-            m = 1;
-            for (int i = 0; i < 2; i++){ //создаём случайное m
-                m *= pow(sieve[rand() % sieve.size()/4], (rand() % 2) + 1);//alpha in [1, 2];
-            }
-            n = 2 * m + 1;
-            if (test_Miller(n, t)) { //если получили простое
+        while(!isPrime){
+            // Выбираем случайные простые числа и степени
+            int q1 = primes[rand() % primes.size()/8];
+            int q2 = primes[rand() % primes.size()/8];
+            int alpha1 = 1 + rand() % 5;
+            int alpha2 = 1 + rand() % 5;
+
+            // Вычисляем F
+            long long F = pow(q1, alpha1) * pow(q2, alpha2);
+
+            // Генерируем чётное R
+            long long R = (1LL << (bitLen(F) - 2)) + (rand() % 50) * 2; // Чётное число
+
+            // Вычисляем n
+            long long n = R * F + 1;
+            if (n != 1 && test_Poclington(n, t)) {
                 primeNums.push_back(n); //записываем его
                 isPrime = true;
-                if (probability_Test(n, test_k)){ //проходит ли оно вероятностный тест
+                if (probability_Test(n, test_k)){ //проходит ли оно веро¤тностный тест
                     primeTestAgree.push_back(true);
                 }
                 else{
                     primeTestAgree.push_back(false);
                 }
             }
-            else{
-                if (probability_Test(n, test_k)){ //если число отброшено, проходит ли оно вероятностный тест
+            else {
+                if (probability_Test(n, test_k)){ //если число отброшено, проходит ли оно веро¤тностный тест
                     k++;
                 }
             }
         }
         primeLostCount.push_back(k);
     }
-    cout << setw(89) << "Тест Миллера" << endl;
+
+    cout << setw(87) << "Тест Поклингтона" << endl;
     printTable(primeNums, primeTestAgree, primeLostCount);
 }

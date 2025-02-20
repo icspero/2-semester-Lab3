@@ -15,10 +15,10 @@ int dividers(int num) {
 		}
 	}
 	if (k == 0) {
-		cout << "Is prime";
+		cout << "Is prime!\n" << endl;
 	}
 	else {
-		cout << "Not prime";
+		cout << "Not prime!\n" << endl;
 	}
 	return 0;
 }
