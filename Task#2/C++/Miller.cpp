@@ -57,7 +57,7 @@ bool probability_Test(int num, int k){ // Миллер-Рабин
         s++;
     }
     for (int i = 0; i < k; i++){
-        int a = rand() % (num - 4) + 2;
+        int a = rand() % (num - 4) + 2; // от 2 до num - 2
         int x = powmod(a, d, num);
         int y;
         for (int j = 0; j < s; j++){
@@ -144,9 +144,8 @@ int test_Miller(int n, int t){
 
 void printTable(const vector<int>& primeNums, const vector<bool>& primeTestAgree, const vector<int>& primeLostCount) {
     int n = primeNums.size();
-    int colWidth = 12; // Ширина каждой ячейки
+    int colWidth = 12;
 
-    // Функция для печати горизонтальной линии
     auto printLine = [&](int count) {
         cout << "+";
         for (int i = 0; i <= count; i++) {
@@ -155,7 +154,6 @@ void printTable(const vector<int>& primeNums, const vector<bool>& primeTestAgree
         cout << endl;
     };
 
-    // Вывод заголовка таблицы
     printLine(n);
     cout << "| " << setw(colWidth + 1) << left << "№";
     for (int i = 0; i < n; i++) {
@@ -165,7 +163,6 @@ void printTable(const vector<int>& primeNums, const vector<bool>& primeTestAgree
 
     printLine(n);
 
-    // Строка с простыми числами
     cout << "| " << setw(colWidth - 1) << left << "P";
     for (int num : primeNums) {
         cout << "| " << setw(colWidth - 1) << left << num;
@@ -173,7 +170,6 @@ void printTable(const vector<int>& primeNums, const vector<bool>& primeTestAgree
     cout << "|" << endl;
     printLine(n);
 
-    // Результат вероятностного теста
     cout << "| " << setw(colWidth + 3) << left << "Тест";
     for (bool result : primeTestAgree) {
         cout << "| " << setw(colWidth - 1) << left << (result ? "+" : "-");
@@ -181,7 +177,6 @@ void printTable(const vector<int>& primeNums, const vector<bool>& primeTestAgree
     cout << "|" << endl;
     printLine(n);
 
-    // Количество отвергнутых чисел, определенных как простые
     cout << "| " << setw(colWidth - 1) << left << "K";
     for (int k : primeLostCount) {
         cout << "| " << setw(colWidth - 1) << left << k;
@@ -200,22 +195,22 @@ int main() {
     int m;
     int n;
     bool isPrime;
-    vector<int> primeNums; //вектор простых
-    vector<int> primeLostCount; //отвергнутые тестом миллера, но прошедшие вероятностный тест
-    vector<bool> primeTestAgree; //проходят ли вероятностный тест простые?
+    vector<int> primeNums; 
+    vector<int> primeLostCount; 
+    vector<bool> primeTestAgree; 
     for (int l = 0; l < 10; l++){
-        isPrime = false; //"зануляем" после получения и записи простого числа
+        isPrime = false;
         k = 0;
-        while (!isPrime){ //пока не получим простое
+        while (!isPrime){
             m = 1;
-            for (int i = 0; i < 2; i++){ //создаём случайное m
-                m *= pow(sieve[rand() % sieve.size()/4], (rand() % 2) + 1);//alpha in [1, 2];
+            for (int i = 0; i < 2; i++) {
+                m *= pow(sieve[rand() % sieve.size()/4], (rand() % 2) + 1); 
             }
             n = 2 * m + 1;
-            if (test_Miller(n, t)) { //если получили простое
-                primeNums.push_back(n); //записываем его
+            if (test_Miller(n, t)) {
+                primeNums.push_back(n);
                 isPrime = true;
-                if (probability_Test(n, test_k)){ //проходит ли оно вероятностный тест
+                if (probability_Test(n, test_k)){
                     primeTestAgree.push_back(true);
                 }
                 else{
@@ -223,7 +218,7 @@ int main() {
                 }
             }
             else{
-                if (probability_Test(n, test_k)){ //если число отброшено, проходит ли оно вероятностный тест
+                if (probability_Test(n, test_k)){
                     k++;
                 }
             }

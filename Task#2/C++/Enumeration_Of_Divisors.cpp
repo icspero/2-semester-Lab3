@@ -6,7 +6,7 @@ using namespace std;
 int dividers(int num) {
 	int k = 0;
 	if (num == 1) {
-		cout << "Not prime, not composite";
+		cout << "Not prime, not composite!\n" << endl;
 		return 0;
 	}
 	for (int i = 2; i <= sqrt(num); i++) {
